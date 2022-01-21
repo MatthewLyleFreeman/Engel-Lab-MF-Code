@@ -19,6 +19,8 @@ Cryogenic Limited - This will need fixed if aquired from the manufacturer.  Thei
 
 -Exclusive or the output of the two searches together into the boolean out of the case.
 
+-CCL_fix.png is a screenshot of fixed code.
+
 Keithley 24XX 
 
 Keithley 2450 
