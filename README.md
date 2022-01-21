@@ -1,8 +1,8 @@
 # Engel-Lab-MF-Code
 Code I wrote for Engel Lab at NHMFL.
 
-Contains:
 Igor Pro 8.0 or greater code written to process data for Engel Lab at National High Magnetic Field Laboratory.
+
 Labview 2018 or greater code written for data acquisition.
 
 Required Drivers: 
