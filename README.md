@@ -7,7 +7,7 @@ Labview 2018 or greater code written for data acquisition.
 
 Required Drivers: 
 
-Cryogenic Limited - This will need fixed if reaquired from the manufacturer.  Their code is unfinished.
+Cryogenic Limited - This will need fixed if aquired from the manufacturer.  Their code is unfinished.
 
 -Their full update code does a search for "OUTPUT:" (the last line the controller sends) to terminate reading from the buffer.
 
