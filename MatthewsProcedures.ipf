@@ -2540,7 +2540,7 @@ Function cspSldr_addZSliders()
 	controlbar 100
 	Variable zMaxVal,zMinVal,rvrs,clr_pos,absMax
 	String colour,rvrs_S, imageDirectory
-	PopupMenu ImageList title="Image",pos={670,10},bodyWidth=100,value=ImageNameList("",";"),fSize=12,proc=cspSldr_ImageMenu
+	PopupMenu ImageList title="Image",pos={770,10},bodyWidth=100,value=ImageNameList("",";"),fSize=12,proc=cspSldr_ImageMenu
 	ControlInfo ImageList
 	imageDirectory = GetDataFolder(1,GetWavesDataFolderDFR(ImageNameToWaveRef("",S_value)))
 	ImageStats $(imageDirectory+S_value)
@@ -2563,14 +2563,16 @@ Function cspSldr_addZSliders()
 	else
 		absMax = abs(V_max)
 	endif
-	PopupMenu colourList title="Colour",value=cTabList(),fSize=12,popValue=colour,proc=cspSldr_colourTab,bodyWidth=150,pos={722,30},mode=clr_pos
+	PopupMenu colourList title="Colour",value=cTabList(),fSize=12,popValue=colour,proc=cspSldr_colourTab,bodyWidth=150,pos={822,30},mode=clr_pos
 	Slider zMax pos={10,10},size={400,20},vert=0,proc=cspSldr_zMax,limits={-2*absMax,2*absMax,0},value=zMaxVal
 	Slider zMin pos={10,50},size={400,20},vert=0,proc=cspSldr_zMin,limits={-2*absMax,2*absMax,0},value=zMinVal
 	Button killZSliders title="Remove Z Sliders",pos={580,75},size={120,20},proc=cspSldr_killZSliders
 	//Button Animate title="Animate",size={80,20},proc=cspSldr_animate
-	PopupMenu reverseColours title="Reverse Colours", value="No;Yes",fSize=12,bodyWidth=50,pos={678,50},proc=cspSldr_reverseColours,mode=(rvrs+1)
-	SetVariable zMaxRange title="Max Range",proc=cspSldr_zMaxRange,size={150,20},value=_NUM:ceil(2*V_max),fSize=12,pos={410,10}
-	SetVariable zMinRange title="Min Range",proc=cspSldr_zMinRange,size={150,20},value=_NUM:ceil(2*V_max),fSize=12,pos={410,50}
+	PopupMenu reverseColours title="Reverse Colours", value="No;Yes",fSize=12,bodyWidth=50,pos={778,50},proc=cspSldr_reverseColours,mode=(rvrs+1)
+	SetVariable zMaxRange title="",proc=cspSldr_zMaxRange,size={100,20},value=_NUM:ceil(2*V_max),fSize=12,pos={560,10}
+	SetVariable zMinRange title="",proc=cspSldr_zMinRange,size={100,20},value=_NUM:ceil(2*V_max),fSize=12,pos={560,50}
+	SetVariable zMaxCenter title="Center/Span", proc=cspSldr_zMaxCenter,size={150,20},value=_NUM:0,fSize=12,pos={410,10}
+	SetVariable zMinCenter title="Center/Span", proc=cspSldr_zMinCenter,size={150,20},value=_NUM:0,fSize=12,pos={410,50}
 End
 
 Function cspSldr_reverseColours(pa) : PopupMenuControl
@@ -2712,7 +2714,9 @@ Function cspSldr_killZSliders(ba) : ButtonControl
 			ControlBar 0
 			KillControl killZSliders
 			killControl zMaxRange
+			killControl zMaxCenter
 			killControl zMinRange
+			killControl zMinCenter
 			killControl ImageList
 			//killcontrol animate
 			killControl colourList
@@ -2725,6 +2729,31 @@ Function cspSldr_killZSliders(ba) : ButtonControl
 	return 0
 End
 
+Function cspSldr_zMaxCenter(sva) : SetVariableControl
+	STRUCT WMSetVariableAction &sva
+
+	switch( sva.eventCode )
+		case 1: // mouse up
+		case 2: // Enter key
+		case 3: // Live update
+			Variable dval = sva.dval
+			String sval = sva.sval
+			ControlInfo zMaxRange
+			Variable Span = V_value/2
+			ControlInfo zMax
+			If(abs(dval) < abs(V_value))
+				Slider zMax value=dval,limits={dval-Span,dval+Span,0}
+			else
+				Slider zMax limits={dval-Span,dval+Span,0}
+			endif
+			break
+		case -1: // control being killed
+			break
+	endswitch
+	
+	return 0
+End
+
 Function cspSldr_zMaxRange(sva) : SetVariableControl
 	STRUCT WMSetVariableAction &sva
 
@@ -2734,17 +2763,44 @@ Function cspSldr_zMaxRange(sva) : SetVariableControl
 		case 3: // Live update
 			Variable dval = sva.dval
 			String sval = sva.sval
+			ControlInfo zMaxCenter
+			Variable center=V_value
 			ControlInfo zMax
 			If(abs(dval) < abs(V_value))
-				Slider zMax value=dval,limits={-dval,dval,0}
+				Slider zMax value=dval,limits={-dval+center,dval+center,0}
 			else 
-				Slider zMax limits={-dval,dval,0}
+				Slider zMax limits={-dval+center,dval+center,0}
 			endif
 			break
 		case -1: // control being killed
 			break
 	endswitch
 
+	return 0
+End
+
+Function cspSldr_zMinCenter(sva) : SetVariableControl
+	STRUCT WMSetVariableAction &sva
+
+	switch( sva.eventCode )
+		case 1: // mouse up
+		case 2: // Enter key
+		case 3: // Live update
+			Variable dval = sva.dval
+			String sval = sva.sval
+			ControlInfo zMinRange
+			Variable Span = V_value/2
+			ControlInfo zMin
+			If(abs(dval) < abs(V_value))
+				Slider zMin value=dval,limits={dval-Span,dval+Span,0}
+			else
+				Slider zMin limits={dval-Span,dval+Span,0}
+			endif
+			break
+		case -1: // control being killed
+			break
+	endswitch
+	
 	return 0
 End
 
@@ -2757,11 +2813,13 @@ Function cspSldr_zMinRange(sva) : SetVariableControl
 		case 3: // Live update
 			Variable dval = sva.dval
 			String sval = sva.sval
+			ControlInfo zMinCenter
+			Variable center = V_value
 			ControlInfo zMin
 			If(abs(dval) < abs(V_value))
-				Slider zMin value=dval,limits={-dval,dval,0}
+				Slider zMin value=dval,limits={-dval+center,dval+center,0}
 			else 
-				Slider zMin limits={-dval,dval,0}
+				Slider zMin limits={-dval+center,dval+center,0}
 			endif
 			break
 		case -1: // control being killed
